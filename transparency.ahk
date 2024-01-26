@@ -1,44 +1,66 @@
-; [Win+A] Toggle always on top
-#a::  Winset, Alwaysontop, , A
+;-------------------------------------------------------------------------------
+; \file     transparency.ahk
+; \brief    Stolen from GitHub gist, modified to my code style.
+; \author   --
+; \date     26.01.2023 (dd/mm/yy)
+; \version  2.00.00
+; \project  Self-Transparency
+;-------------------------------------------------------------------------------
 
-; [Win+WheelUp] Increase opacity
-#WheelUp::
-    DetectHiddenWindows, on
-    WinGet, curtrans, Transparent, A
-    if ! curtrans
-        curtrans = 255
-    newtrans := curtrans + 8
-    if newtrans > 0
+#SingleInstance, Force      ; Make sure that only one *.ahk is running
+SetWinDelay 0               ; Set delay after each windowing command
+SetControlDelay 0           ; Set delay after each control-modifying command
+
+!a::                                        ; Alt-A: Toggle (A)lways on top
+    Winset, Alwaysontop, Toggle, A          ; Uses A(ctive window)
+    return
+
+!WheelUp::                                  ; Alt-MouseWheel_Up
+    DetectHiddenWindows, On                 ; Invisible windows are "seen"
+    
+    WinGet, old, Transparent, A             ; Get active window alpha value
+    
+    if (! old)                              ; Variable has not been initialized
     {
-        WinSet, Transparent, %newtrans%, A
+        old = 255                           ; Initialize to most opaque
+    }
+    
+    new := old + 8                          ; Decrease transparency by 1/32
+    
+    if (new > 0)                            ; Set new transparency value
+    {
+        WinSet, Transparent, %new%, A
     }
     else
     {
         WinSet, Transparent, OFF, A
         WinSet, Transparent, 255, A
     }
-return
+    return
 
-; [Win+WheelDown] Decrease opacity
-#WheelDown::
-    DetectHiddenWindows, on
-    WinGet, curtrans, Transparent, A
-    if ! curtrans
-        curtrans = 255
-    newtrans := curtrans - 8
-    if newtrans > 0
+!WheelDown::                                ; Alt-MouseWheel_Down
+    DetectHiddenWindows, On                 ; Invisible windows are "seen"
+
+    WinGet, old, Transparent, A             ; Get active window alpha value
+    
+    if (! old)                              ; Variable has not been initialized
     {
-        WinSet, Transparent, %newtrans%, A
+        old = 255                           ; Initialize to most opaque
     }
-return
 
-; [Win+O] Set opacity 50%
-#o::
-    WinSet, Transparent, 127, A
-return
+    new := old - 8                          ; Increase transparency by 1/32
+    
+    if new > 0                              ; Set new transparency value
+    {
+        WinSet, Transparent, %new%, A
+    }
+    return
 
-; [Ctrl+Win+O] Reset opacity
-^#o::
-    WinSet, Transparent, 255, A
+!o::                                        ; Alt-O
+    WinSet, Transparent, 25, A              ; Set active window alpha to 10%
+    return
+
+!+o::                                       ; Shift-Alt-O
+    WinSet, Transparent, 255, A             ; Reset active window alpha to 100%
     WinSet, Transparent, OFF, A
-return
+    return
